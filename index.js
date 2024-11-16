@@ -7,7 +7,6 @@ require('dotenv').config();
 
 const uploadImage = require("./src/utils/uploadImage");
 
-// Create Express app
 const app = express();
 
 // Middlewares
@@ -16,27 +15,27 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'https://your-frontend.vercel.app'],
     credentials: true,
 }));
 
-// All routes
+// Routes
 const authRoutes = require('./src/users/user.route');
 const productRoutes = require('./src/products/products.route');
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 
-// Database connection
+// MongoDB Connection
 mongoose.connect(process.env.DB_URL)
     .then(() => console.log("MongoDB successfully connected"))
     .catch((err) => console.error(err));
 
-// Default route
+// Default Route
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-// Upload image route
+// Upload Image Route
 app.post("/uploadImage", (req, res) => {
     uploadImage(req.body.image)
         .then((url) => res.send(url))
