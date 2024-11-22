@@ -16,78 +16,73 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-router.post('/create-checkout-session', verifyToken, async (req, res) => {
-    const { products, grandTotal, userEmail } = req.body; // Include userEmail from frontend
+// Webhook endpoint for Stripe
+router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+
+    let event;
 
     try {
-        // Map products to Stripe's line_items format
-        const lineItems = products.map((product) => ({
-            price_data: {
-                currency: 'usd',
-                product_data: {
-                    name: product.name,
-                },
-                unit_amount: product.price * 100,
-            },
-            quantity: product.quantity,
-        }));
-
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            mode: 'payment',
-            line_items: lineItems,
-            success_url: `${process.env.FRONTEND_URL}`,
-            cancel_url: `${process.env.FRONTEND_URL}`,
-        });
-
-        res.json({ url: session.url });
-
-        // Listen for successful payments using Stripe Webhooks or immediately after session creation
-        stripe.webhooks.events.on('checkout.session.completed', async (event) => {
-            if (event.type === 'checkout.session.completed') {
-                // Send an email with the bill
-                const billHTML = `
-                    <h1>Order Bill</h1>
-                    <p>Thank you for your purchase!</p>
-                    <table border="1" style="border-collapse: collapse; width: 100%;">
-                        <thead>
-                            <tr>
-                                <th>Product Name</th>
-                                <th>Quantity</th>
-                                <th>Price</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${products.map(product => `
-                                <tr>
-                                    <td>${product.name}</td>
-                                    <td>${product.quantity}</td>
-                                    <td>$${product.price.toFixed(2)}</td>
-                                </tr>
-                            `).join('')}
-                            <tr>
-                                <td colspan="2">Tax</td>
-                                <td>$${(grandTotal - products.reduce((acc, p) => acc + p.price * p.quantity, 0)).toFixed(2)}</td>
-                            </tr>
-                            <tr>
-                                <td colspan="2"><strong>Grand Total</strong></td>
-                                <td><strong>$${grandTotal.toFixed(2)}</strong></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                `;
-
-                await transporter.sendMail({
-                    from: process.env.EMAIL_USER,
-                    to: userEmail,
-                    subject: 'Your Order Bill',
-                    html: billHTML,
-                });
-            }
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+        // Verify Stripe webhook signature
+        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    } catch (err) {
+        console.error('Webhook signature verification failed:', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
     }
+
+    // Handle the checkout.session.completed event
+    if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+
+        // Retrieve line items if needed
+        const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+
+        // Construct and send the email
+        const billHTML = `
+            <h1>Order Bill</h1>
+            <p>Thank you for your purchase!</p>
+            <table border="1" style="border-collapse: collapse; width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${lineItems.data.map(item => `
+                        <tr>
+                            <td>${item.description}</td>
+                            <td>${item.quantity}</td>
+                            <td>$${(item.amount_total / 100).toFixed(2)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2"><strong>Grand Total</strong></td>
+                        <td><strong>$${(session.amount_total / 100).toFixed(2)}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        `;
+
+        try {
+            await transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to: session.customer_email, // Use customer_email from the session object
+                subject: 'Your Order Bill',
+                html: billHTML,
+            });
+            console.log('Bill sent successfully!');
+        } catch (emailError) {
+            console.error('Error sending bill:', emailError.message);
+        }
+    }
+
+    // Return a 200 response to acknowledge receipt of the event
+    res.json({ received: true });
 });
+
 
 module.exports = router;
