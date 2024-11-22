@@ -3,7 +3,7 @@ const Stripe = require('stripe');
 const router = express.Router();
 
 // Initialize Stripe with your secret key
-const stripe = new Stripe('your-secret-key-here');
+const stripe = new Stripe('process.env.STRIPE_SECRET_KEY');
 
 // Create a checkout session
 router.post('/create-checkout-session', async (req, res) => {
