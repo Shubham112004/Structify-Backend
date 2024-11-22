@@ -6,18 +6,33 @@ const verifyToken = require('../middlewares/verifyToken');
 require('dotenv').config()
 
 
+const { Clerk } = require('@clerk/clerk-sdk-node');
+const User = require('../models/User');  // Assuming you have a User model
+
 // Register endpoint
 router.post('/register', async (req, res) => {
+    const { email, password, username } = req.body;
+
     try {
-        const { email, password, username } = req.body;
-        const user = new User({ email, password, username });
-        await user.save();
-        res.status(201).send({ message: 'User registered successfully' });
+        // Create a new Clerk user
+        const user = await Clerk.users.create({
+            emailAddress: email,
+            password: password,
+            username: username,
+        });
+
+        // Send the verification email
+        await Clerk.users.sendVerificationEmail(user.id);
+
+        res.status(201).send({
+            message: 'User registered successfully. Please check your email to verify your account.',
+        });
     } catch (error) {
         console.error('Error registering user:', error);
         res.status(500).send({ message: 'Registration failed' });
     }
 });
+
 
 // Login endpoint
 router.post('/login', async (req, res) => {
