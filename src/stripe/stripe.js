@@ -1,13 +1,14 @@
 const express = require('express');
 const Stripe = require('stripe');
 const router = express.Router();
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY; // Reference environment variable
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+const verifyToken = require('../middlewares/verifyToken')
 
 // Initialize Stripe with your secret key
 const stripe = new Stripe(STRIPE_SECRET_KEY); // Use the actual key, not the string
 
 // Create a checkout session
-router.post('/create-checkout-session', async (req, res) => {
+router.post('/create-checkout-session', verifyToken, async (req, res) => {
     const { products, grandTotal } = req.body; // Receive products and grandTotal from frontend
 
     try {
