@@ -8,7 +8,7 @@ const stripe = new Stripe(STRIPE_SECRET_KEY); // Use the actual key, not the str
 
 // Create a checkout session
 router.post('/create-checkout-session', async (req, res) => {
-    const { products } = req.body;
+    const { products, grandTotal } = req.body; // Receive grandTotal from the frontend
 
     try {
         // Map products to Stripe's line_items format
@@ -23,20 +23,22 @@ router.post('/create-checkout-session', async (req, res) => {
             quantity: product.quantity,
         }));
 
-        // Create Stripe checkout session
+        // Create a checkout session with grandTotal
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'payment',
             line_items: lineItems,
-            success_url: `${process.env.FRONTEND_URL}`, // Frontend URL for success
-            cancel_url: `${process.env.FRONTEND_URL}/cancel`, // Frontend URL for cancel
+            // Total price should be based on grandTotal
+            amount_total: grandTotal * 100, // Convert to cents
+            success_url: `${process.env.FRONTEND_URL}`,
+            cancel_url: `${process.env.FRONTEND_URL}`,
         });
 
-        res.json({ url: session.url }); // Send the session URL to the frontend
+        res.json({ url: session.url });
     } catch (error) {
-        console.error("Error during checkout session creation:", error);
-        res.status(500).json({ error: error.message }); // Return error message to frontend
+        res.status(500).json({ error: error.message });
     }
 });
+
 
 module.exports = router;
