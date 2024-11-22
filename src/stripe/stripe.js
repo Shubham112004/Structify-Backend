@@ -23,13 +23,16 @@ router.post('/create-checkout-session', async (req, res) => {
             quantity: product.quantity,
         }));
 
-        // Create the Stripe checkout session
+        // Add a custom metadata field with the grand total (to track it in Stripe)
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'payment',
             line_items: lineItems, // Send line items for Stripe to calculate total
-            success_url: `${process.env.FRONTEND_URL}/success`,
+            success_url: `${process.env.FRONTEND_URL}/success?total=${grandTotal}`,
             cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+            metadata: {
+                grand_total: grandTotal.toString(), // Include the grand total in metadata
+            },
         });
 
         // Send the session URL to the frontend for redirection
@@ -38,6 +41,7 @@ router.post('/create-checkout-session', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 
 
