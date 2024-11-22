@@ -28,8 +28,8 @@ router.post('/create-checkout-session', async (req, res) => {
             payment_method_types: ['card'],
             mode: 'payment',
             line_items: lineItems, // Send line items for Stripe to calculate total
-            success_url: `${process.env.FRONTEND_URL}/success?total=${grandTotal}`,
-            cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+            success_url: `${process.env.FRONTEND_URL}/?total=${grandTotal}`,
+            cancel_url: `${process.env.FRONTEND_URL}`,
             metadata: {
                 grand_total: grandTotal.toString(), // Include the grand total in metadata
             },
