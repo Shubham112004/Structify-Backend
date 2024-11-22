@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
-const stripeRoutes = require('./routes/stripe');
+const stripeRoutes = require('./src/stripe/stripe');
 require('dotenv').config();
 
 const uploadImage = require("./src/utils/uploadImage");
