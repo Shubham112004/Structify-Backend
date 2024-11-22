@@ -6,7 +6,7 @@ const router = express.Router();
 const stripe = new Stripe('your-secret-key-here');
 
 // Create a checkout session
-router.post('/create-checkout-session', async (req, res) => {
+router.post('/api/stripe/create-checkout-session', async (req, res) => {
     const { products } = req.body;
 
     try {
