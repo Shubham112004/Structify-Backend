@@ -5,10 +5,6 @@ const generateToken = require('../middlewares/generateToken');
 const verifyToken = require('../middlewares/verifyToken');
 require('dotenv').config()
 
-
-const { Clerk } = require('@clerk/clerk-sdk-node');
-const User = require('../models/User');  // Assuming you have a User model
-
 // Register endpoint
 router.post('/register', async (req, res) => {
     try {
