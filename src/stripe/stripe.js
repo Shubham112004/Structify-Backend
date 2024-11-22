@@ -6,7 +6,7 @@ const router = express.Router();
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const stripe = new Stripe(STRIPE_SECRET_KEY);
 
-router.post('/create-checkout-session', verifyToken, async (req, res) => {
+router.post('/create-checkout-session', async (req, res) => {
     const { products, grandTotal } = req.body; // Extract products and grandTotal from request body
 
     try {
