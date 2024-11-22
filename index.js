@@ -10,7 +10,6 @@ const uploadImage = require("./src/utils/uploadImage");
 
 const app = express();
 
-app.use('/api/stripe', stripeRoutes);
 // Middlewares
 app.use(express.json({ limit: "25mb" }));
 app.use(cookieParser());
@@ -26,6 +25,7 @@ const authRoutes = require('./src/users/user.route');
 const productRoutes = require('./src/products/products.route');
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/stripe', stripeRoutes);
 
 // MongoDB Connection
 mongoose.connect(process.env.DB_URL)
