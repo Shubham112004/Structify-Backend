@@ -3,12 +3,14 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const stripeRoutes = require('./routes/stripe');
 require('dotenv').config();
 
 const uploadImage = require("./src/utils/uploadImage");
 
 const app = express();
 
+app.use('/api/stripe', stripeRoutes);
 // Middlewares
 app.use(express.json({ limit: "25mb" }));
 app.use(cookieParser());
