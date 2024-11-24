@@ -5,8 +5,6 @@ const generateToken = require('../middlewares/generateToken');
 const verifyToken = require('../middlewares/verifyToken');
 require('dotenv').config()
 
-const { requireAuth } = require('@clerk/clerk-sdk-node');
-
 // Register endpoint
 router.post('/register', async (req, res) => {
     try {
@@ -67,16 +65,6 @@ router.post('/logout', (req, res) => {
     res.status(200).send({ message: 'Logged out successfully' });
 });
 
-// Protect specific routes
-router.get('/users', requireAuth(), async (req, res) => {
-    try {
-        const users = await User.find({}, 'id email role').sort({ createdAt: -1 });
-        res.status(200).send(users);
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        res.status(500).send({ message: 'Failed to fetch users' });
-    }
-});
 
 // all users 
 

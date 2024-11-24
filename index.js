@@ -8,8 +8,6 @@ require('dotenv').config();
 
 const uploadImage = require("./src/utils/uploadImage");
 
-const { requireAuth, ClerkExpressWithAuth } = require('@clerk/clerk-sdk-node');
-
 const app = express();
 
 // Middlewares
@@ -21,12 +19,6 @@ app.use(cors({
     origin: ['http://localhost:5173', 'https://shoptix.vercel.app'],
     credentials: true,
 }));
-
-app.use(ClerkExpressWithAuth({
-    apiKey: process.env.CLERK_API_KEY, // Add your Clerk API key in `.env`
-}));
-console.log('Clerk API Key:', process.env.CLERK_API_KEY);
-
 
 // Routes
 const authRoutes = require('./src/users/user.route');

@@ -10,8 +10,6 @@
   "author": "shubham-gaikwad",
   "license": "ISC",
   "dependencies": {
-    "@clerk/clerk-react": "^5.17.0",
-    "@clerk/clerk-sdk-node": "^5.0.69",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "cloudinary": "^2.5.1",
