@@ -22,7 +22,7 @@
             "headers": [
                 {
                     "key": "Content-Security-Policy",
-                    "value": "default-src 'self'; script-src 'self' https://vercel.live; connect-src 'self'; img-src 'self' data:; style-src 'self';"
+                    "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://vercel.live; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline';"
                 },
                 {
                     "key": "X-Content-Type-Options",
