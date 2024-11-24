@@ -6,10 +6,14 @@
             "use": "@vercel/node"
         }
     ],
-    "routes": [
+    "rewrites": [
         {
-            "src": "/(.*)",
-            "dest": "index.js"
+            "source": "/api/(.*)",
+            "destination": "/index.js"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/index.js"
         }
     ],
     "headers": [
@@ -18,7 +22,7 @@
             "headers": [
                 {
                     "key": "Content-Security-Policy",
-                    "value": "default-src 'self'; script-src 'self' https://vercel.live; connect-src 'self' https://vercel.live;"
+                    "value": "default-src 'self'; script-src 'self' https://vercel.live; connect-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
                 },
                 {
                     "key": "X-Content-Type-Options",
